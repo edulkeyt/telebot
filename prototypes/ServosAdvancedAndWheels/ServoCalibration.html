@@ -1,0 +1,175 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> 
+<html lang="en"> 
+	<head> 
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" > 
+		<title>Servo calibration</title> 
+	</head> 
+	<body> 
+		<div id="controlPanel">
+			<div style="height: 210px;">
+				<div style="float:left; padding-right:30px">
+					<div>
+					<b>Servo:</b>
+						<select onchange="selectServo(this.value, 'Horizontal')">
+						  <option value="0">1</option>
+						  <option value="1">2</option>
+						  <option value="2">3</option>
+						  <option value="3">4</option>
+						  <option value="4">5</option>
+						  <option value="5">6</option>
+						</select>
+					</div>
+					<div>
+						<b>Bind servo to axis:</b>
+						<p><input name="joystick2ServoBindAxis" type="radio" value="0" checked />Vertical axis</p>
+						<p><input name="joystick2ServoBindAxis" type="radio" value="1"/>Horizontal axis</p>
+					</div>
+				</div>
+				<div style="display: inline-block;">
+					<div>
+						<b>Settings:</b>
+					</div>
+					<div style="float:left;" >
+						<p>Angle: </p>
+						<p>Speed: </p>
+						<p>Min angle: </p>
+						<p>Max angle: </p>
+					</div>
+					<div style="display:inline-block" >
+						<p><textarea id="angle" style="resize:none; height: 14px;" readonly></textarea></p>
+						<p><input id="speed"></p>
+						<p><input id="minAngle"></p>
+						<p><input id="maxAngle"></p>
+						<input id="applySettings" type="button" value="Apply settings"/>
+					</div>
+				</div>				
+			</div>
+			<div id="controlAreaLeft" style="display: inline-block; height:350px; width:350px; background-color: #c9c9ff">Calibration joystick</div>
+			<div id="controlAreaRight" style="display: inline-block; position: absolute; right: 0px; height:350px; width:350px; background-color: #a9c9ff"/>Test calibration parameters</div>
+		</div>
+		<script src="js/RequestHelper.js"></script>
+		<script src="js/Joystick.js"></script>
+		<script>
+		
+			function servoConf(minAngle, maxAngle, speed){
+				return {
+					minAngle: minAngle,
+					maxAngle: maxAngle,
+					angle: 90,
+					speed: speed
+				}
+			}
+			
+			var controlState = {
+				
+				angles: function(anglesArr){
+					if(anglesArr !== undefined && anglesArr.length <= 0){
+						servos.forEach(function(servo, i){servo.angle = anglesArr[i]});
+					}
+					
+					return this.servos.map(function(servo){return servo.angle});
+				},
+				
+				selectedServo: null,
+				
+				servos: [
+					servoConf(0, 180, 0.7),
+					servoConf(0, 180, 0.7),
+					servoConf(0, 180, 0.7),
+					servoConf(0, 180, 0.7),
+					servoConf(0, 180, 0.7),
+					servoConf(0, 180, 0.7)
+				]
+			}
+			
+			var leftServoBinding = null;
+			var rightServoBinding = null;
+			var view = {
+				angleTextArea: null,
+				speedInput: document.getElementById("speed"),
+				minAngleInput: document.getElementById("minAngle"),
+				maxAngleInput: document.getElementById("maxAngle"),
+				applySettingsButton: document.getElementById("applySettings"),
+				
+				init: function(){
+					this.angleTextArea = document.getElementById("angle"),
+					this.speedInput = document.getElementById("speed"),
+					this.minAngleInput = document.getElementById("minAngle"),
+					this.maxAngleInput = document.getElementById("maxAngle"),
+					this.applySettingsButton = document.getElementById("applySettings"),
+					this.applySettingsButton.onclick = function(){
+						updateControlState();
+						view.update();
+						saveSettings();
+					};
+					
+					selectServo("0","Horizontal")
+					this.update();
+				},
+				
+				updateAngle: function(){
+					this.angleTextArea.value = controlState.selectedServo.angle;
+				},
+				
+				update: function(){
+					this.angleTextArea.value = controlState.selectedServo.angle;
+					this.minAngleInput.value = controlState.selectedServo.minAngle;
+					this.maxAngleInput.value = controlState.selectedServo.maxAngle;
+					this.speedInput.value = controlState.selectedServo.speed;
+				}
+			}
+			
+			
+			
+			function selectServo(servoNumStr, horizontalOrVertical){
+				removeBinding(leftServoBinding);
+				removeBinding(rightServoBinding);
+				
+				controlState.selectedServo = controlState.servos[parseInt(servoNumStr)];
+				nullableServo = servoConf(0, 180, 0.7);
+				leftServoBinding = calibrationJoystick(
+					document.getElementById("controlAreaLeft"), 
+					horizontalOrVertical == "Horizontal" ? controlState.selectedServo : nullableServo, 
+					horizontalOrVertical == "Vertical" ? controlState.selectedServo : nullableServo, 
+					sendServosAngles);
+				rightServoBinding = joystick(
+					document.getElementById("controlAreaRight"), 
+					horizontalOrVertical == "Horizontal" ? controlState.selectedServo : nullableServo, 
+					horizontalOrVertical == "Vertical" ? controlState.selectedServo : nullableServo, 
+					sendServosAngles);
+					
+				view.update();
+			}
+			
+			function updateControlState(){
+				controlState.selectedServo.speed = parseFloat(view.speedInput.value);
+				var a = parseFloat(view.minAngleInput.value);
+				var b = parseFloat(view.maxAngleInput.value);
+				controlState.selectedServo.minAngle = a > b? b : a;
+				controlState.selectedServo.maxAngle = a > b? a : b;
+			}
+			
+			function sendServosAngles(){
+				httpGetSync(getUrlCommand("servos=" + controlState.angles().join("a")), null);
+				view.updateAngle();
+			}
+
+			function controlStateFromJson(jsonStr){
+				controlState.servos = JSON.parse(jsonStr);
+				
+				view.init();
+			}
+			
+			function saveSettings(){
+				httpGetAsync(getUrlCommand("saveServoSettings/data=" + JSON.stringify(controlState.servos)), null);
+			}
+			
+			function getServosAngles(){
+				httpGetAsync(getUrlCommand("getPositions"), controlStateFromJson);
+			}
+
+			getServosAngles();
+			
+		</script>
+	</body> 
+</html>
