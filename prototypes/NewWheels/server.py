@@ -100,7 +100,7 @@ class MyHandler(CGIHTTPRequestHandler):
     def buildServoSetting(self, settingSubstr, servoAngle):
         return '"angle":' + str(servoAngle) + settingSubstr[settingSubstr.find(','):]
 
-#ser = serial.Serial(SERIAL_PORT, SERIAL_BAUD_RATE)
+ser = serial.Serial(SERIAL_PORT, SERIAL_BAUD_RATE)
 
 httpd = HTTPServer(SERVER_ADDRESS, MyHandler)
 print("Server started")

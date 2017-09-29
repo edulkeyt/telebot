@@ -5,14 +5,30 @@
     <title>Wheels joystick test</title>
     <link rel="stylesheet" type="text/css" href="controls/wheelsJoystick/wheelsJoystick.css">
     <script src="js/jquery-3.2.1.min.js"></script>
-    <script src="controls/wheelsJoystick/wheelsJoystick.js"></script> 
+    <script src="js/requestHelper.js"></script>
+    <script src="controls/wheelsJoystick/wheelsJoystick.js"></script>
+    <script>
+
+      $(document).ready(function(){
+
+          var wheelsJoysticks = $(".wheels-joystick");
+
+          function sendWheelsState(leftWheelDirection, rightWheelDirection){
+            httpGetSync(getUrlCommand("wheels=" + (rightWheelDirection + leftWheelDirection * 4).toString()), null);
+          }
+
+          wheelsJoysticks.each(function(index, item){
+            var wheelsJoystickDiv = item;
+            wheelsJoystick(wheelsJoystickDiv, 25, sendWheelsState);
+          })    
+      })
+
+    </script>
   </head>  
   <body>
     <div class="wheels-joystick-wrapper">
-      <div style="height: 1000px">
-      </div>
       <div class="wheels-joystick">
       </div>
-    </div>
+    </div>    
   </body>
 </html>
