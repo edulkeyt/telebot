@@ -2,20 +2,8 @@ const wheelForward = 1;
 const wheelStop = 0;
 const wheelBack = 2;
 
-function wheelsJoystick(joystickDiv, _strictAreaRadius, setWheelsState){
+function wheelsJoystick(joystickDiv, _strictAreaRadius, _maxSpeed, setWheelsState){
     
-    //start move to function parameters
-
-    //let _strictAreaRadius = 20;
-
-    /*function setWheelsState(leftWheelDirection, rightWheelDirection){//, leftWheelSpeed, RightWheelSpeed){
-        let directionLetters = ['b', 's', 'f'];        
-        console.clear();
-        console.log(directionLetters[leftWheelDirection + 1] + directionLetters[rightWheelDirection + 1]);
-    }*/
-
-    //end
-
     let _joystickWidth = $(joystickDiv).width();
 
     function getAbsoluteDivCenterX(div){
@@ -46,7 +34,25 @@ function wheelsJoystick(joystickDiv, _strictAreaRadius, setWheelsState){
                 return wheelStop;
             }
             
-            setWheelsState(calculateWheelDirection(leftWheelAxisCoord), calculateWheelDirection(rightWheelAxisCoord));
+            function calculateWheelSpeed(wheelAxisCoord, joystickRadius, maxSpeed){
+                
+                let speed;
+
+                if(wheelAxisCoord > strictAreaRadius) speed = ~~((wheelAxisCoord - strictAreaRadius) * maxSpeed / (joystickRadius - 2 * strictAreaRadius));
+                else if(wheelAxisCoord < -strictAreaRadius) speed = ~~(-(wheelAxisCoord + strictAreaRadius) * maxSpeed / (joystickRadius - 2 * strictAreaRadius));
+                else speed = 0;
+                
+                if(speed >= maxSpeed) return maxSpeed;
+                if(speed <= 0) return 0;
+                return speed;
+            }
+
+            setWheelsState(
+                calculateWheelDirection(leftWheelAxisCoord), 
+                calculateWheelDirection(rightWheelAxisCoord),
+                calculateWheelSpeed(leftWheelAxisCoord, _joystickWidth / 2, _maxSpeed),
+                calculateWheelSpeed(rightWheelAxisCoord, _joystickWidth / 2, _maxSpeed)
+            );
         }
 
         e.preventDefault();

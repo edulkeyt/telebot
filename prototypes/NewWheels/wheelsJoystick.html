@@ -13,13 +13,17 @@
 
           var wheelsJoysticks = $(".wheels-joystick");
 
-          function sendWheelsState(leftWheelDirection, rightWheelDirection){
-            httpGetSync(getUrlCommand("wheels=" + (rightWheelDirection + leftWheelDirection * 4).toString()), null);
+          function sendWheelsState(leftWheelDirection, rightWheelDirection, leftWheelSpeed, rightWheelSpeed){
+            httpGetSync(getUrlCommand("wheels="
+                + (rightWheelDirection + leftWheelDirection * 4).toString()
+                + ":" + leftWheelSpeed.toString()
+                + ":" + rightWheelSpeed.toString()),
+              null);
           }
 
           wheelsJoysticks.each(function(index, item){
             var wheelsJoystickDiv = item;
-            wheelsJoystick(wheelsJoystickDiv, 25, sendWheelsState);
+            wheelsJoystick(wheelsJoystickDiv, 25, 255, sendWheelsState);
           })    
       })
 

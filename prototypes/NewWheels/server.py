@@ -15,6 +15,9 @@ GET_SERVO_POSITIONS_COMMAND_CODE = 255;
 
 SAVE_SERVO_SETTINGS_PARAMETER_NAME = "saveServoSettings/data=";
 SERVO_SETTING_PATH = "settings/servo.txt"
+SERVO_ARGUMENTS_SEPARATOR = 'a';
+
+WHEELS_ARGUMENTS_SEPARATOR = ":";
 
 SERVER_ADDRESS = ("", 8000)
 
@@ -47,17 +50,19 @@ class MyHandler(CGIHTTPRequestHandler):
 
         if command.startswith(SERVO_COMMAND_PARAMETER_NAME):
             self.setHeaders();
-            anglesStrings = command[len(SERVO_COMMAND_PARAMETER_NAME):].split('a');
+            anglesStrings = command[len(SERVO_COMMAND_PARAMETER_NAME):].split(SERVO_ARGUMENTS_SEPARATOR);
             serialBytes = stringArrayToIntBytes(anglesStrings);
             ser.write(bytes(serialBytes));            
             return;
 
         if command.startswith(WHEELS_COMMAND_PARAMETER_NAME):
             self.setHeaders();
-            commandString = command[len(WHEELS_COMMAND_PARAMETER_NAME):];
+            commandStrings = command[len(WHEELS_COMMAND_PARAMETER_NAME):].split(WHEELS_ARGUMENTS_SEPARATOR);
             commandInt = [];
             commandInt.append(WHEELS_COMMAND_CODE);
-            commandInt.append(int(commandString));
+            commandInt.append(int(commandStrings[0]));
+            commandInt.append(int(commandStrings[1]));
+            commandInt.append(int(commandStrings[2]));
             ser.write(bytes(commandInt));
             return;
 
