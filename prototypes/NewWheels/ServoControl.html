@@ -32,32 +32,21 @@
 				height: 150px;
 				width: 150px;
 			}
-		</style
+		</style>
+		<link rel="stylesheet" type="text/css" href="controls/wheelsJoystick/wheelsJoystick.css">
 	</head> 
 	<body> 
 		<div id="controlPanel">
 			<div class="upper-panel">
-				<!--<div class="control-left" style="float: left;">
-					<div>
-						<button id="btnLeftWheelFwd" class="wheel-button"/>
-					</div>
-					<div>
-						<button id="btnLeftWheelBck" class="wheel-button"/>
-					</div>
-				</div>-->
-				<div id="camera1wrapper" style="display:inline-block; float:left; height:490px; border-color: #ffc9ff">				
+				<!--<div id="camera1wrapper" style="display:inline-block; float:left; height:490px; border-color: #ffc9ff">				
 					<div id="camera" style="display: inline-block; height:480px; width:640px; border-color: #ffc9ff">
-						<!--<img src='http://192.168.0.101:8080/cam1.mjpg'/>-->
+						<img src='http://192.168.0.101:8080/cam1.mjpg'/>
 					</div>				
-				</div>
-				<!--<div style="display:inline-block">
-					<div>
-						<button id="btnRightWheelFwd" class="wheel-button"/>
-					</div>
-					<div>
-						<button id="btnRightWheelBck" class="wheel-button"/>
-					</div>
 				</div>-->
+				<div class="wheels-joystick-wrapper">
+					<div class="wheels-joystick">
+					</div>
+				</div> 				
 			</div>
 			<div>
 				<div id="controlAreaLeft" class="joystick control-left light-pink-background"></div>
@@ -71,6 +60,30 @@
 		<script src="js/requestHelper.js"></script>
 		<script src="js/Joystick.js"></script>
 		<script src="js/WheelsCommandManager.js"></script>
+		<script src="js/jquery-3.2.1.min.js"></script>
+		<script src="js/requestHelper.js"></script>
+		<script src="controls/wheelsJoystick/wheelsJoystick.js"></script>
+		<script>
+
+			$(document).ready(function(){
+
+				var wheelsJoysticks = $(".wheels-joystick");
+
+				function sendWheelsState(leftWheelDirection, rightWheelDirection, leftWheelSpeed, rightWheelSpeed){
+					httpGetSync(getUrlCommand("wheels="
+						+ (rightWheelDirection + leftWheelDirection * 4).toString()
+						+ ":" + leftWheelSpeed.toString()
+						+ ":" + rightWheelSpeed.toString()),
+					null);
+				}
+
+				wheelsJoysticks.each(function(index, item){
+					var wheelsJoystickDiv = item;
+					wheelsJoystick(wheelsJoystickDiv, 25, 255, sendWheelsState);
+				})    
+			})
+
+		</script>
 		<script>			
 			
 			console.log('main');
@@ -135,18 +148,6 @@
 			function getServosAngles(){
 				httpGetAsync(getUrlCommand("getPositions"), controlStateFromJson);
 			}
-
-			/*function inititalizeWheels(){
-				wheels(
-					document.getElementById("btnRightWheelFwd"),
-					document.getElementById("btnRightWheelBck"),
-					document.getElementById("btnLeftWheelFwd"),
-					document.getElementById("btnLeftWheelBck"),
-					function(commandString){console.log("wheels command " + commandString);httpGetSync(getUrlCommand("wheels=" + commandString), null);})
-			}
-			
-			console.log("before wheels init");
-			inititalizeWheels();*/
 			
 			getServosAngles();
 			

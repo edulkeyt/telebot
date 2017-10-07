@@ -18,15 +18,16 @@ function httpGetAsync(theUrl, callback) {
 	xmlHttp.send(null);
 }
 
-const responseTimeout = 100;
 var sendRequests = true;
 function httpGetSync(url, callback){
+	const _responseTimeout = 100;
+
 	if(!sendRequests) return;
 	sendRequests = false;
 				
 	function allowSendRequest(){sendRequests = true;}
 				
-	var timer = setTimeout(allowSendRequest, responseTimeout);				
+	var timer = setTimeout(allowSendRequest, _responseTimeout);				
 	httpGetAsync(url, function(httpResponse){
 		clearTimeout(timer);
 		allowSendRequest();
