@@ -76,10 +76,11 @@ class MyHandler(CGIHTTPRequestHandler):
 
         if command == GET_SERVO_POSITIONS_COMMAND:
             self.setHeaders();
-            ser.write(bytes([GET_SERVO_POSITIONS_COMMAND_CODE]));
-            time.sleep(SERIAL_TIMEOUT * 4 / 1000);
-            serialBytesAvaible = ser.inWaiting();
-            servosAngles = ser.readline(serialBytesAvaible);
+            #ser.write(bytes([GET_SERVO_POSITIONS_COMMAND_CODE]));
+            #time.sleep(SERIAL_TIMEOUT * 4 / 1000);
+            #serialBytesAvaible = ser.inWaiting();
+            #servosAngles = ser.readline(serialBytesAvaible);
+            servosAngles = bytes([90, 90, 90, 90, 90, 90]);
             #print(bytesToStringOfNumbers(servosAngles));
 
             servoSettingsFile = open(SERVO_SETTING_PATH, 'r');

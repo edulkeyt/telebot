@@ -1,17 +1,22 @@
 #include <Servo.h>
+#include <Adafruit_PWMServoDriver.h>
 
 const short SERIAL_BAUD_RATE = 9600;
 const byte SERIAL_TIMEOUT = 20;
 
 const short SERVOS_COUNT = 6;
 
+const byte SG90_MIN = 120;
+const short SG90_MAX = 540;
+const byte MG995_MIN = 110;
+const short MG995_MAX = 595;
+
 const byte GET_SERVOS_POSITIONS_COMMAND_CODE = 255;
 
 const byte WHEELS_COMMAND_CODE = 200;
 
-short servoPins[SERVOS_COUNT] = { 3, 5, 6, 9, 10, 11 };
+//short servoPins[SERVOS_COUNT] = { 3, 5, 6, 9, 10, 11 };
 
-//short wheelPins[4] = { 2, 4, 7, 8 };
 short leftFwd = 8;
 short leftBck = 7;
 short rightFwd = 2;
@@ -19,7 +24,8 @@ short rightBck = 4;
 short leftSpeedPin = 9;
 short rightSpeedPin = 3;
 
-Servo servos[SERVOS_COUNT];
+Adafruit_PWMServoDriver pwmDriver = Adafruit_PWMServoDriver(0x40);
+//Servo servos[SERVOS_COUNT];
 byte servoPositions[SERVOS_COUNT];
 
 bool requredToSendPositions = false;
@@ -33,6 +39,9 @@ void setup() {
   for(short i = 0; i < SERVOS_COUNT; i++){
     servos[i].attach(servoPins[i]);
   }*/
+
+  pwmDriver.begin();
+  pwmDriver.setPWMFreq(60);
 
   pinMode(leftFwd, OUTPUT);
   pinMode(leftBck, OUTPUT);
@@ -54,26 +63,27 @@ void loop() {
       case WHEELS_COMMAND_CODE:
         SetWheels(servoPositions[1], servoPositions[2], servoPositions[3]);
         break;
-      /*default:
+      default:
         for(short i = 0; i < SERVOS_COUNT; i++){
-          servos[i].write(servoPositions[i]);
-        }*/
+          //servos[i].write(servoPositions[i]);
+          pwmDriver.setPWM(i, 0, getSG90PulseFromDegree(servoPositions[i]));
+        }
     }
   }
-  else{
+  /*else{
     if(requredToSendPositions){
       SetServosPositions();
       Serial.write(servoPositions, SERVOS_COUNT);
       requredToSendPositions = false;
     }
-  }
+  }*/
 }
 
-void SetServosPositions(){
+/*void SetServosPositions(){
   for(byte i=0; i<SERVOS_COUNT; i++){
     servoPositions[i] = servos[i].read();
   }
-}
+}*/
 
 void SetWheels(byte parameter, byte speedLeft, byte speedRight){
   SetWheels(parameter, rightFwd, rightBck);
@@ -102,5 +112,13 @@ void SetWheels(byte parameter, short fwdPin, short bckPin){
         break;        
     }
   }
+}
+
+short getSG90PulseFromDegree(byte position180based){
+  return map(position180based, 0, 181, SG90_MIN, SG90_MAX);
+}
+
+short getMG995PulseFromDegree(byte position180based){
+  return map(position180based, 0, 181, MG995_MIN, MG995_MAX);
 }
 
