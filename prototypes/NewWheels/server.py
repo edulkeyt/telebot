@@ -8,6 +8,7 @@ SERIAL_BAUD_RATE = 9600;
 SERIAL_TIMEOUT = 20;
 
 SERVO_COMMAND_PARAMETER_NAME = "servos=";
+SERVO_COMMAND_CODE = 100;
 WHEELS_COMMAND_PARAMETER_NAME = "wheels=";
 WHEELS_COMMAND_CODE = 200;
 GET_SERVO_POSITIONS_COMMAND = "getPositions";
@@ -41,6 +42,7 @@ class MyHandler(CGIHTTPRequestHandler):
 
         def stringArrayToIntBytes(strings):
             result = [];
+            result.append(SERVO_COMMAND_CODE);
             for substring in strings:
                 #result.append(bytes([int(substring)]));
                 result.append(int(substring));
@@ -52,6 +54,7 @@ class MyHandler(CGIHTTPRequestHandler):
             self.setHeaders();
             anglesStrings = command[len(SERVO_COMMAND_PARAMETER_NAME):].split(SERVO_ARGUMENTS_SEPARATOR);
             serialBytes = stringArrayToIntBytes(anglesStrings);
+            print(serialBytes);
             ser.write(bytes(serialBytes));            
             return;
 

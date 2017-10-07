@@ -12,8 +12,9 @@ const byte MG995_MIN = 110;
 const short MG995_MAX = 595;
 
 const byte GET_SERVOS_POSITIONS_COMMAND_CODE = 255;
-
 const byte WHEELS_COMMAND_CODE = 200;
+const byte SERVOS_COMMAND_CODE = 100;
+const byte SERVOS_COMMAND_ARGUMENTS_ADDRESS_OFFSET = 1;
 
 //short servoPins[SERVOS_COUNT] = { 3, 5, 6, 9, 10, 11 };
 
@@ -52,9 +53,10 @@ void setup() {
 }
 
 void loop() {
-  
-  if(Serial.available()) {
-    Serial.readBytes(servoPositions, SERVOS_COUNT);
+  byte bytesAvaibleCount = (byte)Serial.available();
+  byte currentServoArgumentNumber;
+  if(bytesAvaibleCount) {
+    Serial.readBytes(servoPositions, bytesAvaibleCount);
 
     switch(servoPositions[0]){
       case GET_SERVOS_POSITIONS_COMMAND_CODE:
@@ -63,10 +65,11 @@ void loop() {
       case WHEELS_COMMAND_CODE:
         SetWheels(servoPositions[1], servoPositions[2], servoPositions[3]);
         break;
-      default:
+      case SERVOS_COMMAND_CODE:
         for(short i = 0; i < SERVOS_COUNT; i++){
-          //servos[i].write(servoPositions[i]);
-          pwmDriver.setPWM(i, 0, getSG90PulseFromDegree(servoPositions[i]));
+          currentServoArgumentNumber = i + SERVOS_COMMAND_ARGUMENTS_ADDRESS_OFFSET;
+          //if(currentServoArgumentNumber >= bytesAvaibleCount) break;
+          pwmDriver.setPWM(i, 0, getSG90PulseFromDegree(servoPositions[currentServoArgumentNumber]));
         }
     }
   }
