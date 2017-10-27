@@ -1,18 +1,17 @@
 from http.server import HTTPServer, CGIHTTPRequestHandler
 import time
-import serial
 import urllib
+import Adafruit_PCA9685
+import RPi.GPIO as gpio
 
-SERIAL_PORT = '/dev/ttyUSB0';
-SERIAL_BAUD_RATE = 9600;
-SERIAL_TIMEOUT = 20;
+SG90_MAX_ANGLE = 180;
+
+SG90_MIN_PULSE = 130
+SG90_PULSE_DELTA = 470
 
 SERVO_COMMAND_PARAMETER_NAME = "servos=";
-SERVO_COMMAND_CODE = 100;
 WHEELS_COMMAND_PARAMETER_NAME = "wheels=";
-WHEELS_COMMAND_CODE = 200;
 GET_SERVO_POSITIONS_COMMAND = "getPositions";
-GET_SERVO_POSITIONS_COMMAND_CODE = 255;
 
 SAVE_SERVO_SETTINGS_PARAMETER_NAME = "saveServoSettings/data=";
 SERVO_SETTING_PATH = "settings/servo.txt"
@@ -21,6 +20,20 @@ SERVO_ARGUMENTS_SEPARATOR = 'a';
 WHEELS_ARGUMENTS_SEPARATOR = ":";
 
 SERVER_ADDRESS = ("", 8000)
+
+PCA9685_FREQUENCY = 60
+
+GPIO_EN_A_PIN = 13
+GPIO_IN_1_PIN = 19
+GPIO_IN_2_PIN = 16
+GPIO_IN_3_PIN = 26
+GPIO_IN_4_PIN = 20
+GPIO_EN_B_PIN = 21
+
+GPIO_PWM_FREQUENCY = 60;
+
+GPIO_PWM_DEGREE = 100;
+GPIO_PWM_CLIENT_DEGREE = 255;
 
 class MyHandler(CGIHTTPRequestHandler):
 
@@ -34,39 +47,50 @@ class MyHandler(CGIHTTPRequestHandler):
     
     def do_GET(self):
 
-        def bytesToStringOfNumbers(byteArray):
-            result = "[";
-            for i in byteArray:
-                result += str(int(i)) + ",";           
-            return result[0:-1] + "]";
+        def setServosPositionsFromDegreesStrings(strings):
+            for i, substring in enumerate(strings):
+                angle = int(substring);
+                pulse = int(SG90_MIN_PULSE + angle * SG90_PULSE_DELTA / SG90_MAX_ANGLE);
+                pca9685.set_pwm(i, 0, pulse);
 
-        def stringArrayToIntBytes(strings):
-            result = [];
-            result.append(SERVO_COMMAND_CODE);
-            for substring in strings:
-                #result.append(bytes([int(substring)]));
-                result.append(int(substring));
-            return result;
+        def setWheelsStateFromStrings(strings):
+            leftWheelState = int(int(strings[0])/4);
+            rightWheelState = int(int(strings[0])%4);
+            #print(str(leftWheelState) + ' ' + str(rightWheelState))
+
+            if leftWheelState == 0:
+                gpio.output(GPIO_IN_1_PIN, False);
+                gpio.output(GPIO_IN_2_PIN, False);
+            elif leftWheelState == 1:
+                gpio.output(GPIO_IN_1_PIN, True);
+            elif leftWheelState == 2:
+                gpio.output(GPIO_IN_2_PIN, True);
+
+            if rightWheelState == 0:
+                gpio.output(GPIO_IN_3_PIN, False);
+                gpio.output(GPIO_IN_4_PIN, False);
+            elif rightWheelState == 1:
+                gpio.output(GPIO_IN_4_PIN, True);
+            elif rightWheelState == 2:
+                gpio.output(GPIO_IN_3_PIN, True);
+
+            #leftWheelCycle = int(int(strings[1]) * GPIO_PWM_DEGREE / GPIO_PWM_CLIENT_DEGREE)
+            #rightWheelCycle = int(int(strings[2]) * GPIO_PWM_DEGREE / GPIO_PWM_CLIENT_DEGREE)
+            #leftWheelPWM.ChangeDutyCycle(leftWheelCycle)
+            #rightWheelPWM.ChangeDutyCycle(rightWheelCycle)            
 
         command = self.path[1:];        
 
         if command.startswith(SERVO_COMMAND_PARAMETER_NAME):
             self.setHeaders();
             anglesStrings = command[len(SERVO_COMMAND_PARAMETER_NAME):].split(SERVO_ARGUMENTS_SEPARATOR);
-            serialBytes = stringArrayToIntBytes(anglesStrings);
-            print(serialBytes);
-            ser.write(bytes(serialBytes));            
+            setServosPositionsFromDegreesStrings(anglesStrings);
             return;
 
         if command.startswith(WHEELS_COMMAND_PARAMETER_NAME):
             self.setHeaders();
             commandStrings = command[len(WHEELS_COMMAND_PARAMETER_NAME):].split(WHEELS_ARGUMENTS_SEPARATOR);
-            commandInt = [];
-            commandInt.append(WHEELS_COMMAND_CODE);
-            commandInt.append(int(commandStrings[0]));
-            commandInt.append(int(commandStrings[1]));
-            commandInt.append(int(commandStrings[2]));
-            ser.write(bytes(commandInt));
+            setWheelsStateFromStrings(commandStrings);
             return;
 
         if command.startswith(SAVE_SERVO_SETTINGS_PARAMETER_NAME):
@@ -79,16 +103,10 @@ class MyHandler(CGIHTTPRequestHandler):
 
         if command == GET_SERVO_POSITIONS_COMMAND:
             self.setHeaders();
-            #ser.write(bytes([GET_SERVO_POSITIONS_COMMAND_CODE]));
-            #time.sleep(SERIAL_TIMEOUT * 4 / 1000);
-            #serialBytesAvaible = ser.inWaiting();
-            #servosAngles = ser.readline(serialBytesAvaible);
             servosAngles = bytes([90, 90, 90, 90, 90, 90]);
-            #print(bytesToStringOfNumbers(servosAngles));
 
             servoSettingsFile = open(SERVO_SETTING_PATH, 'r');
             settingsJson = servoSettingsFile.read();
-            #print(settingsJson);
             servoSettingsFile.close();
 
             self.wfile.write(self.buildServosSettings(settingsJson, servosAngles).encode('ascii'));
@@ -109,8 +127,26 @@ class MyHandler(CGIHTTPRequestHandler):
     def buildServoSetting(self, settingSubstr, servoAngle):
         return '"angle":' + str(servoAngle) + settingSubstr[settingSubstr.find(','):]
 
-ser = serial.Serial(SERIAL_PORT, SERIAL_BAUD_RATE)
+pca9685 = Adafruit_PCA9685.PCA9685()
+pca9685.set_pwm_freq(PCA9685_FREQUENCY)
+
+gpio.setmode(gpio.BCM)
+
+gpio.setup(GPIO_EN_A_PIN, gpio.OUT)
+gpio.setup(GPIO_IN_1_PIN, gpio.OUT)
+gpio.setup(GPIO_IN_2_PIN, gpio.OUT)
+gpio.setup(GPIO_IN_3_PIN, gpio.OUT)
+gpio.setup(GPIO_IN_4_PIN, gpio.OUT)
+gpio.setup(GPIO_EN_B_PIN, gpio.OUT)
+
+leftWheelPWM = gpio.PWM(GPIO_EN_A_PIN, GPIO_PWM_FREQUENCY)
+rightWheelPWM = gpio.PWM(GPIO_EN_B_PIN, GPIO_PWM_FREQUENCY)
 
 httpd = HTTPServer(SERVER_ADDRESS, MyHandler)
 print("Server started")
 httpd.serve_forever()
+
+leftWheelPWM.stop()
+rightWheelPWM.stop()
+
+gpio.cleanup()
