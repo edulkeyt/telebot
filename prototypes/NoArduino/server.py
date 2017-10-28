@@ -74,10 +74,10 @@ class MyHandler(CGIHTTPRequestHandler):
             elif rightWheelState == 2:
                 gpio.output(GPIO_IN_3_PIN, True);
 
-            #leftWheelCycle = int(int(strings[1]) * GPIO_PWM_DEGREE / GPIO_PWM_CLIENT_DEGREE)
-            #rightWheelCycle = int(int(strings[2]) * GPIO_PWM_DEGREE / GPIO_PWM_CLIENT_DEGREE)
-            #leftWheelPWM.ChangeDutyCycle(leftWheelCycle)
-            #rightWheelPWM.ChangeDutyCycle(rightWheelCycle)            
+            leftWheelCycle = int(int(strings[1]) * GPIO_PWM_DEGREE / GPIO_PWM_CLIENT_DEGREE)
+            rightWheelCycle = int(int(strings[2]) * GPIO_PWM_DEGREE / GPIO_PWM_CLIENT_DEGREE)
+            leftWheelPWM.ChangeDutyCycle(leftWheelCycle)
+            rightWheelPWM.ChangeDutyCycle(rightWheelCycle)            
 
         command = self.path[1:];        
 
@@ -130,6 +130,8 @@ class MyHandler(CGIHTTPRequestHandler):
 pca9685 = Adafruit_PCA9685.PCA9685()
 pca9685.set_pwm_freq(PCA9685_FREQUENCY)
 
+gpio.cleanup()
+
 gpio.setmode(gpio.BCM)
 
 gpio.setup(GPIO_EN_A_PIN, gpio.OUT)
@@ -141,6 +143,9 @@ gpio.setup(GPIO_EN_B_PIN, gpio.OUT)
 
 leftWheelPWM = gpio.PWM(GPIO_EN_A_PIN, GPIO_PWM_FREQUENCY)
 rightWheelPWM = gpio.PWM(GPIO_EN_B_PIN, GPIO_PWM_FREQUENCY)
+
+leftWheelPWM.start(0);
+rightWheelPWM.start(0);
 
 httpd = HTTPServer(SERVER_ADDRESS, MyHandler)
 print("Server started")
