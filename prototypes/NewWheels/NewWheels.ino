@@ -27,7 +27,7 @@ short rightSpeedPin = 3;
 
 Adafruit_PWMServoDriver pwmDriver = Adafruit_PWMServoDriver(0x40);
 //Servo servos[SERVOS_COUNT];
-byte servoPositions[SERVOS_COUNT];
+byte serialInputBytes[SERVOS_COUNT];
 
 bool requredToSendPositions = false;
 
@@ -53,23 +53,24 @@ void setup() {
 }
 
 void loop() {
-  byte bytesAvaibleCount = (byte)Serial.available();
+  byte serialInputBytesCount = Serial.available();
   byte currentServoArgumentNumber;
-  if(bytesAvaibleCount) {
-    Serial.readBytes(servoPositions, bytesAvaibleCount);
-
-    switch(servoPositions[0]){
+  if(serialInputBytesCount > 0) {
+    //Serial.readBytes(serialInputBytes, serialInputBytesCount);
+    Serial.readBytes(serialInputBytes, 10);
+        
+    switch(serialInputBytes[0]){
       case GET_SERVOS_POSITIONS_COMMAND_CODE:
         requredToSendPositions = true;
         break;
       case WHEELS_COMMAND_CODE:
-        SetWheels(servoPositions[1], servoPositions[2], servoPositions[3]);
+        SetWheels(serialInputBytes[1], serialInputBytes[2], serialInputBytes[3]);
         break;
       case SERVOS_COMMAND_CODE:
         for(short i = 0; i < SERVOS_COUNT; i++){
           currentServoArgumentNumber = i + SERVOS_COMMAND_ARGUMENTS_ADDRESS_OFFSET;
-          //if(currentServoArgumentNumber >= bytesAvaibleCount) break;
-          pwmDriver.setPWM(i, 0, getSG90PulseFromDegree(servoPositions[currentServoArgumentNumber]));
+          //if(currentServoArgumentNumber >= serialInputBytesCount) break;
+          pwmDriver.setPWM(i, 0, getSG90PulseFromDegree(serialInputBytes[currentServoArgumentNumber]));
         }
     }
   }
