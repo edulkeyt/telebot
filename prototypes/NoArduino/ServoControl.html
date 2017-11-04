@@ -137,6 +137,7 @@
 				joystick(document.getElementById("controlAreaRight"), controlState.servos[0], controlState.servos[2], sendServosAngles);
 				joystick(document.getElementById("controlAreaLeft2"), controlState.servos[4], controlState.servos[3], sendServosAngles);
 				joystick(document.getElementById("controlAreaRight2"), controlState.servos[5], servoConf(0, 180, 90, 0.7), sendServosAngles);
+				joystick(document.getElementById("controlAreaRight2"), controlState.servos[6], controlState.servos[7], sendServosAngles);
 			}
 
 			function controlStateFromJson(jsonStr){
