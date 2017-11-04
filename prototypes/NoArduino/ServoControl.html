@@ -13,8 +13,8 @@
 				right: 0px; 
 			}
 			.joystick{
-				height:350px; 
-				width:350px;
+				height:300px; 
+				width:300px;
 			}
 			.light-blue-background{
 				background-color: #a9c9ff;
@@ -28,9 +28,12 @@
 			.light-orange-background{
 				background-color: #ffffc9;
 			}
-			.wheel-button {
-				height: 150px;
-				width: 150px;
+			.camera{
+				width: 640px;
+				height: 480px;				
+				/* background-color: #c999c9; */
+				display: block;
+				margin: auto;
 			}
 		</style>
 		<link rel="stylesheet" type="text/css" href="controls/wheelsJoystick/wheelsJoystick.css">
@@ -38,15 +41,19 @@
 	<body> 
 		<div id="controlPanel">
 			<div class="upper-panel">
-				<!--<div id="camera1wrapper" style="display:inline-block; float:left; height:490px; border-color: #ffc9ff">				
-					<div id="camera" style="display: inline-block; height:480px; width:640px; border-color: #ffc9ff">
-						<img src='http://192.168.0.101:8080/cam1.mjpg'/>
-					</div>				
-				</div>-->
-				<div class="wheels-joystick-wrapper">
-					<div class="wheels-joystick">
+				<div id="camera" class="camera">
+					<img src='http://192.168.0.101:8080/cam1.mjpg'/>
+				</div>							
+			</div>
+			<div>
+				<div id="camera1wrapper" class="control-left">				
+					<div id="camera_joystick" class="joystick control-left light-green-background">
 					</div>
-				</div> 				
+				</div>
+				<div class="wheels-joystick-wrapper control-right">
+					<div id="wheels_joystick" class="wheels-joystick">
+					</div>
+				</div> 	
 			</div>
 			<div>
 				<div id="controlAreaLeft" class="joystick control-left light-pink-background"></div>
