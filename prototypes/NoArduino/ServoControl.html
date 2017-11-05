@@ -95,8 +95,6 @@
 			
 			console.log('main');
 			
-			const speed = 0.7;		
-			
 			function servoConf(minAngle, maxAngle, angle, speed){
 				return {
 					minAngle: minAngle,
@@ -117,14 +115,14 @@
 				},
 				
 				servos: [
+					servoConf(0, 180, 90, -0.3),
+					servoConf(0, 180, 90, 0.3),
+					servoConf(0, 180, 90, 0.3),
+					servoConf(0, 180, 90, 0.5),
 					servoConf(0, 180, 90, 0.7),
-					servoConf(0, 180, 90, 0.7),
-					servoConf(0, 180, 90, 0.7),
-					servoConf(0, 180, 90, 0.7),
-					servoConf(0, 180, 90, 0.7),
-					servoConf(0, 180, 90, 0.7),
-					servoConf(0, 180, 90, 0.7),
-					servoConf(0, 180, 90, 0.7)
+					servoConf(0, 180, 90, 0.5),
+					servoConf(0, 180, 90, -0.5),
+					servoConf(0, 180, 90, 0.5)
 				]
 			}
 			
@@ -136,7 +134,7 @@
 				joystick(document.getElementById("controlAreaLeft"), controlState.servos[0], controlState.servos[1], sendServosAngles);
 				joystick(document.getElementById("controlAreaRight"), controlState.servos[0], controlState.servos[2], sendServosAngles);
 				joystick(document.getElementById("controlAreaLeft2"), controlState.servos[4], controlState.servos[3], sendServosAngles);
-				joystick(document.getElementById("controlAreaRight2"), controlState.servos[5], servoConf(0, 180, 90, 0.7), sendServosAngles);
+				joystick(document.getElementById("controlAreaRight2"), servoConf(0, 180, 90, 0.7), controlState.servos[5], sendServosAngles);
 				joystick(document.getElementById("camera_joystick"), controlState.servos[6], controlState.servos[7], sendServosAngles);
 			}
 
