@@ -2,7 +2,7 @@ const wheelForward = 1;
 const wheelStop = 0;
 const wheelBack = 2;
 
-function wheelsJoystick(joystickDiv, _strictAreaRadius, _maxSpeed, setWheelsState){
+function wheelsJoystick(joystickDiv, _strictAreaRadius, _maxSpeed, setWheelsState, stopAction){
     
     let _joystickWidth = $(joystickDiv).width();
 
@@ -62,5 +62,14 @@ function wheelsJoystick(joystickDiv, _strictAreaRadius, _maxSpeed, setWheelsStat
         calculateWheelsState(-joystickX, -joystickY, _strictAreaRadius, _joystickWidth);
     }
 
-    joystickDiv.addEventListener("touchmove", move, true);
+	function stop(e){
+		e.preventDefault();
+		stopAction();
+	}
+	
+    joystickDiv.addEventListener("touchstart", move, true);
+	joystickDiv.addEventListener("touchmove", move, true);
+	if(typeof stopAction!= 'undefined' && stopAction !== null){
+		joystickDiv.addEventListener("touchend", stop, true);
+	}
 }

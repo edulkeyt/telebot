@@ -84,9 +84,13 @@
 					null);
 				}
 
+				function sendStopSignal(){
+					httpGetSync(getUrlCommand("wheels=0:0:0", null);
+				}
+				
 				wheelsJoysticks.each(function(index, item){
 					var wheelsJoystickDiv = item;
-					wheelsJoystick(wheelsJoystickDiv, 25, 255, sendWheelsState);
+					wheelsJoystick(wheelsJoystickDiv, 25, 255, sendWheelsState, sendStopSignal);
 				})    
 			})
 
