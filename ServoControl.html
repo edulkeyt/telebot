@@ -11,7 +11,7 @@
 		<div id="controlPanel">
 			<div class="upper-panel">
 				<div id="camera" class="camera">
-					<img src='http://192.168.1.40:8900/1.mjpg'/>
+					<img src='http://10.3.141.1:8900/1.mjpg'/>
 				</div>							
 			</div>
 			<div>
@@ -35,14 +35,11 @@
 		</div>
 		<script src="js/requestHelper.js"></script>
 		<script src="js/jquery-3.2.1.min.js"></script>
-		<script src="controls/joystick/Joystick.js"></script>
+		<script src="controls/joystick/joystick.js"></script>
 		<script src="controls/wheelsJoystick/wheelsJoystick.js"></script>
 		<script>
-
 			function initWheelsControl(){
-
 				var wheelsJoysticks = $(".wheels-joystick");
-
 				function sendWheelsState(leftWheelDirection, rightWheelDirection, leftWheelSpeed, rightWheelSpeed){
 					httpGetSync(getUrlCommand("wheels="
 						+ (rightWheelDirection + leftWheelDirection * 4).toString()
@@ -50,17 +47,16 @@
 						+ ":" + rightWheelSpeed.toString()),
 					null);
 				}
-
 				function sendStopSignal(){
-					httpGetSync(getUrlCommand("wheels=0:0:0", null);
+					httpGetSync(getUrlCommand("wheels=0:0:0", null));
 				}
 				
 				wheelsJoysticks.each(function(index, item){
 					var wheelsJoystickDiv = item;
 					wheelsJoystick(wheelsJoystickDiv, 25, 255, sendWheelsState, sendStopSignal);
-				})    
-			})	
-			
+				})
+			}	
+
 			function initServoControl(){
 			
 				console.log('main');
@@ -95,11 +91,11 @@
 						servoConf(0, 180, 90, 0.5)
 					]
 				}
-				
+
 				function sendServosAngles(){			
 					httpGetSync(getUrlCommand("servos=" + controlState.angles().join("a")), null);
 				}
-				
+
 				function initJoysticks(){
 					joystick(document.getElementById("controlAreaLeft"), controlState.servos[0], controlState.servos[1], sendServosAngles);
 					joystick(document.getElementById("controlAreaRight"), controlState.servos[0], controlState.servos[2], sendServosAngles);
@@ -108,14 +104,15 @@
 					joystick(document.getElementById("camera_joystick"), controlState.servos[6], controlState.servos[7], sendServosAngles);
 				}
 
-				initJoysticks();			
+				initJoysticks();
+
 			}
 			
 			$(document).ready(function(){
 				initWheelsControl();
 				initServoControl();
 			});
-			
+
 		</script>
 	</body> 
 </html>
