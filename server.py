@@ -3,6 +3,7 @@ import time
 import urllib
 import Adafruit_PCA9685
 import RPi.GPIO as gpio
+from wheels.py import WheelsController
 
 SG90_MAX_ANGLE = 180;
 
@@ -23,18 +24,6 @@ SERVER_ADDRESS = ("", 8000)
 
 PCA9685_FREQUENCY = 60
 
-GPIO_EN_A_PIN = 13
-GPIO_IN_1_PIN = 19
-GPIO_IN_2_PIN = 16
-GPIO_IN_3_PIN = 26
-GPIO_IN_4_PIN = 20
-GPIO_EN_B_PIN = 21
-
-GPIO_PWM_FREQUENCY = 60;
-
-GPIO_PWM_DEGREE = 100;
-GPIO_PWM_CLIENT_DEGREE = 255;
-
 class MyHandler(CGIHTTPRequestHandler):
 
     def setHeaders(self):
@@ -53,32 +42,6 @@ class MyHandler(CGIHTTPRequestHandler):
                 pulse = int(SG90_MIN_PULSE + angle * SG90_PULSE_DELTA / SG90_MAX_ANGLE);
                 pca9685.set_pwm(i, 0, pulse);
 
-        def setWheelsStateFromStrings(strings):
-            leftWheelState = int(int(strings[0])/4);
-            rightWheelState = int(int(strings[0])%4);
-            #print(str(leftWheelState) + ' ' + str(rightWheelState))
-
-            if leftWheelState == 0:
-                gpio.output(GPIO_IN_1_PIN, False);
-                gpio.output(GPIO_IN_2_PIN, False);
-            elif leftWheelState == 1:
-                gpio.output(GPIO_IN_1_PIN, True);
-            elif leftWheelState == 2:
-                gpio.output(GPIO_IN_2_PIN, True);
-
-            if rightWheelState == 0:
-                gpio.output(GPIO_IN_3_PIN, False);
-                gpio.output(GPIO_IN_4_PIN, False);
-            elif rightWheelState == 1:
-                gpio.output(GPIO_IN_4_PIN, True);
-            elif rightWheelState == 2:
-                gpio.output(GPIO_IN_3_PIN, True);
-
-            leftWheelCycle = int(int(strings[1]) * GPIO_PWM_DEGREE / GPIO_PWM_CLIENT_DEGREE)
-            rightWheelCycle = int(int(strings[2]) * GPIO_PWM_DEGREE / GPIO_PWM_CLIENT_DEGREE)
-            leftWheelPWM.ChangeDutyCycle(leftWheelCycle)
-            rightWheelPWM.ChangeDutyCycle(rightWheelCycle)            
-
         command = self.path[1:];        
 
         if command.startswith(SERVO_COMMAND_PARAMETER_NAME):
@@ -90,7 +53,7 @@ class MyHandler(CGIHTTPRequestHandler):
         if command.startswith(WHEELS_COMMAND_PARAMETER_NAME):
             self.setHeaders();
             commandStrings = command[len(WHEELS_COMMAND_PARAMETER_NAME):].split(WHEELS_ARGUMENTS_SEPARATOR);
-            setWheelsStateFromStrings(commandStrings);
+            wheels.setWheelsStateFromStrings(commandStrings);
             return;
 
         if command.startswith(SAVE_SERVO_SETTINGS_PARAMETER_NAME):
@@ -130,28 +93,11 @@ class MyHandler(CGIHTTPRequestHandler):
 pca9685 = Adafruit_PCA9685.PCA9685()
 pca9685.set_pwm_freq(PCA9685_FREQUENCY)
 
-gpio.cleanup()
-
-gpio.setmode(gpio.BCM)
-
-gpio.setup(GPIO_EN_A_PIN, gpio.OUT)
-gpio.setup(GPIO_IN_1_PIN, gpio.OUT)
-gpio.setup(GPIO_IN_2_PIN, gpio.OUT)
-gpio.setup(GPIO_IN_3_PIN, gpio.OUT)
-gpio.setup(GPIO_IN_4_PIN, gpio.OUT)
-gpio.setup(GPIO_EN_B_PIN, gpio.OUT)
-
-leftWheelPWM = gpio.PWM(GPIO_EN_A_PIN, GPIO_PWM_FREQUENCY)
-rightWheelPWM = gpio.PWM(GPIO_EN_B_PIN, GPIO_PWM_FREQUENCY)
-
-leftWheelPWM.start(0);
-rightWheelPWM.start(0);
+wheels = WheelsController();
+wheels.init();
 
 httpd = HTTPServer(SERVER_ADDRESS, MyHandler)
 print("Server started")
 httpd.serve_forever()
 
-leftWheelPWM.stop()
-rightWheelPWM.stop()
-
-gpio.cleanup()
+wheels.dispose();
