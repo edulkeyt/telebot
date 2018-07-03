@@ -1,8 +1,8 @@
 from http.server import HTTPServer, CGIHTTPRequestHandler
 import time
 import urllib
-from wheels.py import WheelsController
-from servos.py import ServosController
+from wheels import WheelsController
+from servos import ServosController
 
 SERVO_COMMAND_PARAMETER_NAME = "servos=";
 WHEELS_COMMAND_PARAMETER_NAME = "wheels=";

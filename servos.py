@@ -13,7 +13,7 @@ class ServosController:
 		pca9685.set_pwm_freq(PCA9685_FREQUENCY)
 		
 	def setServosPositionsFromDegreesStrings(self, strings):
-        for i, substring in enumerate(strings):
-            angle = int(substring);
-            pulse = int(SG90_MIN_PULSE + angle * SG90_PULSE_DELTA / SG90_MAX_ANGLE);
-            pca9685.set_pwm(i, 0, pulse);
+	    for i, substring in enumerate(strings):
+	        angle = int(substring);
+	        pulse = int(SG90_MIN_PULSE + angle * SG90_PULSE_DELTA / SG90_MAX_ANGLE);
+	        pca9685.set_pwm(i, 0, pulse);

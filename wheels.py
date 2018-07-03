@@ -36,26 +36,26 @@ class WheelsController:
 		gpio.cleanup()
 		
 	def setWheelsStateFromStrings(self, strings):
-        leftWheelState = int(int(strings[0])/4);
-        rightWheelState = int(int(strings[0])%4);
-        
-        if leftWheelState == 0:
-            gpio.output(GPIO_IN_1_PIN, False);
-            gpio.output(GPIO_IN_2_PIN, False);
-        elif leftWheelState == 1:
-            gpio.output(GPIO_IN_1_PIN, True);
-        elif leftWheelState == 2:
-            gpio.output(GPIO_IN_2_PIN, True);
+		leftWheelState = int(int(strings[0])/4);
+		rightWheelState = int(int(strings[0])%4);
+		
+		if leftWheelState == 0:
+		    gpio.output(GPIO_IN_1_PIN, False);
+		    gpio.output(GPIO_IN_2_PIN, False);
+		elif leftWheelState == 1:
+		    gpio.output(GPIO_IN_1_PIN, True);
+		elif leftWheelState == 2:
+		    gpio.output(GPIO_IN_2_PIN, True);
 
-        if rightWheelState == 0:
-            gpio.output(GPIO_IN_3_PIN, False);
-            gpio.output(GPIO_IN_4_PIN, False);
-        elif rightWheelState == 1:
-            gpio.output(GPIO_IN_4_PIN, True);
-        elif rightWheelState == 2:
-            gpio.output(GPIO_IN_3_PIN, True);
+		if rightWheelState == 0:
+		    gpio.output(GPIO_IN_3_PIN, False);
+		    gpio.output(GPIO_IN_4_PIN, False);
+		elif rightWheelState == 1:
+		    gpio.output(GPIO_IN_4_PIN, True);
+		elif rightWheelState == 2:
+		    gpio.output(GPIO_IN_3_PIN, True);
 
-        leftWheelCycle = int(int(strings[1]) * GPIO_PWM_DEGREE / GPIO_PWM_CLIENT_DEGREE)
-        rightWheelCycle = int(int(strings[2]) * GPIO_PWM_DEGREE / GPIO_PWM_CLIENT_DEGREE)
-        leftWheelPWM.ChangeDutyCycle(leftWheelCycle)
-        rightWheelPWM.ChangeDutyCycle(rightWheelCycle) 
+		leftWheelCycle = int(int(strings[1]) * GPIO_PWM_DEGREE / GPIO_PWM_CLIENT_DEGREE)
+		rightWheelCycle = int(int(strings[2]) * GPIO_PWM_DEGREE / GPIO_PWM_CLIENT_DEGREE)
+		leftWheelPWM.ChangeDutyCycle(leftWheelCycle)
+		rightWheelPWM.ChangeDutyCycle(rightWheelCycle) 
