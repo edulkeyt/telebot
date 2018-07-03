@@ -1,0 +1,26 @@
+.control-left{
+	display: inline-block; 
+}		
+.control-right{
+	display: inline-block; 
+	position: absolute; 
+	right: 0px; 
+}			
+.light-blue-background{
+	background-color: #a9c9ff;
+}
+.light-pink-background{
+	background-color: #c9c9ff;
+}
+.light-green-background{
+	background-color: #c9ffc9;
+}
+.light-orange-background{
+	background-color: #ffffc9;
+}
+.camera{
+	width: 640px;
+	height: 480px;								
+	display: block;
+	margin: auto;
+}

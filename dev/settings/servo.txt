@@ -1,0 +1,1 @@
+[{"minAngle":40,"maxAngle":140,"angle":82,"speed":0.5},{"minAngle":10,"maxAngle":150,"angle":93,"speed":0.7},{"minAngle":30,"maxAngle":170,"angle":90,"speed":0.7},{"minAngle":0,"maxAngle":130,"angle":86,"speed":0.7},{"minAngle":0,"maxAngle":160,"angle":160,"speed":0.7},{"minAngle":94,"maxAngle":108,"angle":108,"speed":0.7}]

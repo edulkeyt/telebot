@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"> 
+<html lang="en"> 
+	<head> 
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" > 
+		<title>Servo control</title>
+		<link rel="stylesheet" type="text/css" href="ServoControl.css">
+		<link rel="stylesheet" type="text/css" href="controls/joystick/joystick.css">
+		<link rel="stylesheet" type="text/css" href="controls/wheelsJoystick/wheelsJoystick.css">		
+	</head> 
+	<body> 
+		<div id="controlPanel">
+			<div class="upper-panel">
+				<div id="camera" class="camera">
+					<img src='http://192.168.1.40:8900/1.mjpg'/>
+				</div>							
+			</div>
+			<div>
+				<div id="camera1wrapper" class="control-left">				
+					<div id="camera_joystick" class="joystick control-left light-green-background">
+					</div>
+				</div>
+				<div class="wheels-joystick-wrapper control-right">
+					<div id="wheels_joystick" class="wheels-joystick">
+					</div>
+				</div> 	
+			</div>
+			<div>
+				<div id="controlAreaLeft" class="joystick control-left light-pink-background"></div>
+				<div id="controlAreaRight" class="joystick control-right light-blue-background"/></div>
+			</div>
+			<div>
+				<div id="controlAreaLeft2" class="joystick control-left light-orange-background"></div>
+				<div id="controlAreaRight2" class="joystick control-right light-green-background"/></div>
+			</div>
+		</div>
+		<script src="js/requestHelper.js"></script>
+		<script src="js/jquery-3.2.1.min.js"></script>
+		<script src="controls/joystick/Joystick.js"></script>
+		<script src="controls/wheelsJoystick/wheelsJoystick.js"></script>
+		<script>
+
+			function initWheelsControl(){
+
+				var wheelsJoysticks = $(".wheels-joystick");
+
+				function sendWheelsState(leftWheelDirection, rightWheelDirection, leftWheelSpeed, rightWheelSpeed){
+					httpGetSync(getUrlCommand("wheels="
+						+ (rightWheelDirection + leftWheelDirection * 4).toString()
+						+ ":" + leftWheelSpeed.toString()
+						+ ":" + rightWheelSpeed.toString()),
+					null);
+				}
+
+				function sendStopSignal(){
+					httpGetSync(getUrlCommand("wheels=0:0:0", null);
+				}
+				
+				wheelsJoysticks.each(function(index, item){
+					var wheelsJoystickDiv = item;
+					wheelsJoystick(wheelsJoystickDiv, 25, 255, sendWheelsState, sendStopSignal);
+				})    
+			})	
+			
+			function initServoControl(){
+			
+				console.log('main');
+				
+				function servoConf(minAngle, maxAngle, angle, speed){
+					return {
+						minAngle: minAngle,
+						maxAngle: maxAngle,
+						angle: angle,
+						speed: speed
+					}
+				}
+				
+				var controlState = {
+					
+					angles: function(anglesArr){
+						if(anglesArr !== undefined && anglesArr.length <= 0){
+							servos.forEach(function(servo, i){servo.angle = anglesArr[i]});
+						}
+						
+						return this.servos.map(function(servo){return servo.angle});
+					},
+					
+					servos: [
+						servoConf(0, 180, 90, -0.3),
+						servoConf(0, 180, 90, 0.3),
+						servoConf(0, 180, 90, 0.3),
+						servoConf(0, 180, 90, 0.5),
+						servoConf(0, 180, 90, 0.7),
+						servoConf(0, 180, 90, 0.5),
+						servoConf(0, 180, 90, -0.5),
+						servoConf(0, 180, 90, 0.5)
+					]
+				}
+				
+				function sendServosAngles(){			
+					httpGetSync(getUrlCommand("servos=" + controlState.angles().join("a")), null);
+				}
+				
+				function initJoysticks(){
+					joystick(document.getElementById("controlAreaLeft"), controlState.servos[0], controlState.servos[1], sendServosAngles);
+					joystick(document.getElementById("controlAreaRight"), controlState.servos[0], controlState.servos[2], sendServosAngles);
+					joystick(document.getElementById("controlAreaLeft2"), controlState.servos[4], controlState.servos[3], sendServosAngles);
+					joystick(document.getElementById("controlAreaRight2"), servoConf(0, 180, 90, 0.7), controlState.servos[5], sendServosAngles);
+					joystick(document.getElementById("camera_joystick"), controlState.servos[6], controlState.servos[7], sendServosAngles);
+				}
+
+				function controlStateFromJson(jsonStr){
+					newConfig = JSON.parse(jsonStr);
+				
+					function validateConfig(newConfig){
+						if(newConfig == null ||
+							typeof(newConfig) === 'undefined' ||
+							newConfig.servos == null ||
+							typeof(newConfig.servos) === 'undefined')
+						return false;
+					
+						return newConfig.servos.length === controlState.servos.length;
+					}
+				
+					if(validateConfig(newConfig))
+						controlState.servos = newConfig
+					
+					initJoysticks();
+				}
+				
+				function getServosAngles(){
+					httpGetAsync(getUrlCommand("getPositions"), controlStateFromJson);
+				}
+				
+				//getServosAngles();
+
+				initJoysticks();
+			
+			}
+			
+			$(document).ready(function(){
+				initWheelsControl();
+				initServoControl();
+			});
+			
+		</script>
+	</body> 
+</html>

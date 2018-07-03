@@ -1,0 +1,12 @@
+.wheels-joystick{
+    height:300px; 
+    width:300px;
+    background-color: lightslategray;
+    margin: 0px;
+    padding: 0px !important;
+}
+
+.wheels-joystick-wrapper{
+    margin: 0px;
+    padding: 0px;
+}
