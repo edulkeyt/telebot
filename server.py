@@ -30,7 +30,7 @@ class MyHandler(CGIHTTPRequestHandler):
         if command.startswith(SERVO_COMMAND_PARAMETER_NAME):
             self.setHeaders();
             anglesStrings = command[len(SERVO_COMMAND_PARAMETER_NAME):].split(SERVO_ARGUMENTS_SEPARATOR);
-            setServosPositionsFromDegreesStrings(anglesStrings);
+            servos.setServosPositionsFromDegreesStrings(anglesStrings);
             return;
 
         if command.startswith(WHEELS_COMMAND_PARAMETER_NAME):
@@ -43,10 +43,8 @@ class MyHandler(CGIHTTPRequestHandler):
         return;
 
 servos = ServosController();
-servos.init();
 
 wheels = WheelsController();
-wheels.init();
 
 httpd = HTTPServer(SERVER_ADDRESS, MyHandler)
 print("Server started")
