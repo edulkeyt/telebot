@@ -108,33 +108,7 @@
 					joystick(document.getElementById("camera_joystick"), controlState.servos[6], controlState.servos[7], sendServosAngles);
 				}
 
-				function controlStateFromJson(jsonStr){
-					newConfig = JSON.parse(jsonStr);
-				
-					function validateConfig(newConfig){
-						if(newConfig == null ||
-							typeof(newConfig) === 'undefined' ||
-							newConfig.servos == null ||
-							typeof(newConfig.servos) === 'undefined')
-						return false;
-					
-						return newConfig.servos.length === controlState.servos.length;
-					}
-				
-					if(validateConfig(newConfig))
-						controlState.servos = newConfig
-					
-					initJoysticks();
-				}
-				
-				function getServosAngles(){
-					httpGetAsync(getUrlCommand("getPositions"), controlStateFromJson);
-				}
-				
-				//getServosAngles();
-
-				initJoysticks();
-			
+				initJoysticks();			
 			}
 			
 			$(document).ready(function(){

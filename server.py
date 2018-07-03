@@ -6,10 +6,7 @@ from servos.py import ServosController
 
 SERVO_COMMAND_PARAMETER_NAME = "servos=";
 WHEELS_COMMAND_PARAMETER_NAME = "wheels=";
-GET_SERVO_POSITIONS_COMMAND = "getPositions";
 
-SAVE_SERVO_SETTINGS_PARAMETER_NAME = "saveServoSettings/data=";
-SERVO_SETTING_PATH = "settings/servo.txt"
 SERVO_ARGUMENTS_SEPARATOR = 'a';
 
 WHEELS_ARGUMENTS_SEPARATOR = ":";
@@ -42,39 +39,8 @@ class MyHandler(CGIHTTPRequestHandler):
             wheels.setWheelsStateFromStrings(commandStrings);
             return;
 
-        if command.startswith(SAVE_SERVO_SETTINGS_PARAMETER_NAME):
-            self.setHeaders();
-            servoSettingsFile = open(SERVO_SETTING_PATH, 'w');
-            servoSettingsFile.write(urllib.parse.unquote(command[len(SAVE_SERVO_SETTINGS_PARAMETER_NAME):]));
-            servoSettingsFile.close();
-            return;
-
-
-        if command == GET_SERVO_POSITIONS_COMMAND:
-            self.setHeaders();
-            servosAngles = bytes([90, 90, 90, 90, 90, 90]);
-
-            servoSettingsFile = open(SERVO_SETTING_PATH, 'r');
-            settingsJson = servoSettingsFile.read();
-            servoSettingsFile.close();
-
-            self.wfile.write(self.buildServosSettings(settingsJson, servosAngles).encode('ascii'));
-            return;
-        
-        super().do_GET();
-        
+        super().do_GET();        
         return;
-
-    def buildServosSettings(self, settingsJson, servosAngles):
-        settingSubstr = settingsJson.split('"angle":');
-        if len(settingSubstr) >= 0:
-            result = settingSubstr[0];
-        for i in range(len(settingSubstr)-1):
-            result += self.buildServoSetting(settingSubstr[i+1],servosAngles[i]);
-        return result
-
-    def buildServoSetting(self, settingSubstr, servoAngle):
-        return '"angle":' + str(servoAngle) + settingSubstr[settingSubstr.find(','):]
 
 servos = ServosController();
 servos.init();
