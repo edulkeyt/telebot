@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Wheels joystick test</title>
+    <link rel="stylesheet" type="text/css" href="controls/wheelsJoystick/wheelsJoystick.css">
+    <script src="js/jquery-3.2.1.min.js"></script>
+    <script src="js/requestHelper.js"></script>
+    <script src="controls/wheelsJoystick/wheelsJoystick.js"></script>
+    <script>
+
+      $(document).ready(function(){
+
+          var wheelsJoysticks = $(".wheels-joystick");
+
+          function sendWheelsState(leftWheelDirection, rightWheelDirection, leftWheelSpeed, rightWheelSpeed){
+            httpGetSync(getUrlCommand("wheels="
+                + (rightWheelDirection + leftWheelDirection * 4).toString()
+                + ":" + leftWheelSpeed.toString()
+                + ":" + rightWheelSpeed.toString()),
+              null);
+          }
+
+          wheelsJoysticks.each(function(index, item){
+            var wheelsJoystickDiv = item;
+            wheelsJoystick(wheelsJoystickDiv, 25, 255, sendWheelsState);
+          })    
+      })
+
+    </script>
+  </head>  
+  <body>
+    <div class="wheels-joystick-wrapper">
+      <div class="wheels-joystick">
+      </div>
+    </div>    
+  </body>
+</html>
